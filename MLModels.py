@@ -31,12 +31,12 @@ sentiment_remove = ['neu', 'pos', 'neg', 'compound']
 
 
 class TrainingData:
-    def __init__(self, target=None):
+    def __init__(self, path="final_train_data.csv", target=None):
         (self.X, self.y) = (None, None)
         (self.Xtrain, self.Xtest), (self.ytrain, self.ytest) = (None, None), (None, None)
         self.model = None
 
-        self.listings = pd.read_csv(f"{FILE_PATH}final_train_data.csv")
+        self.listings = pd.read_csv(path)
 
         self.needed_columns = list(
             set(self.listings.keys()) - set(id_columns)
@@ -85,23 +85,33 @@ class TrainingData:
         visualizer.fit(self.Xtrain, self.ytrain)
         visualizer.score(self.Xtest, self.ytest)
         
-        # model_name = str(self.model).split('(')[0]
+        self.model_name = str(self.model).split('(')[0]
         
         visualizer.show()
-        # visualizer.show(outpath=f"{model_name}/ROC/ROCAUC-{self.predicting}.png")
+        # visualizer.show(outpath=f"{self.model_name}/ROC/ROCAUC-{self.predicting}.png")
 
     def feature_importance(self):
         feature_importance = abs(self.model.coef_[0])
         feature_importance = 100.0 * (feature_importance / feature_importance.max())
+        
         top_features = pd.DataFrame({'feature_imp': feature_importance,
-                                     'features': self.X.columns}, columns=['feature_imp', 'features'])
-        top_features = top_features.sort_values(by='feature_imp', ascending=False).head(10)
+                                     'features': self.X.columns}, 
+                                    columns=['feature_imp', 'features'])
+        
+        top_features = top_features.sort_values(by='feature_imp', 
+                                                ascending=False).head(15)
+        
+        fig = plt.figure()
         plt.barh(top_features.features, top_features.feature_imp)
-        plt.xlabel('Importance', fontsize=28)
-        plt.ylabel('Feature', fontsize=26)
-        plt.xticks(fontsize=20)
-        plt.yticks(fontsize=20)
+        plt.xlabel('Importance')
+        plt.ylabel('Features')
+        # plt.xticks(fontsize=15)
+        plt.yticks(fontsize=15)
+        plt.tight_layout()
+        plt.savefig(f"{self.model_name}/FeatureImportance/{self.predicting}.png", 
+                    dpi=120)
         plt.show()
+
 
 
 def display_models_details():
@@ -109,8 +119,8 @@ def display_models_details():
 
 
 class LogisticRegressionModel(TrainingData):
-    def __init__(self, target=None, penalty='l2', C=1.0):
-        super().__init__(target=target)
+    def __init__(self, path=None, target=None, penalty='l2', C=1.0):
+        super().__init__(path=path, target=target)
         self.model = LogisticRegression(penalty=penalty, C=C)
         self.train_data()
         self.print_metrics()
@@ -119,8 +129,8 @@ class LogisticRegressionModel(TrainingData):
 
 
 class KNeighborsModel(TrainingData):
-    def __init__(self, target=None, n_neighbors=5):
-        super().__init__(target=target)
+    def __init__(self, path=None, target=None, n_neighbors=5):
+        super().__init__(path=path, target=target)
         self.model = KNeighborsClassifier(n_neighbors=n_neighbors, weights='uniform')
         self.train_data()
         self.print_metrics()
@@ -128,8 +138,8 @@ class KNeighborsModel(TrainingData):
 
 
 class DummyClassifierModel(TrainingData):
-    def __init__(self, target=None, strategy='most_frequent'):
-        super().__init__(target=target)
+    def __init__(self, path=None, target=None, strategy='most_frequent'):
+        super().__init__(path=path, target=target)
         self.model = DummyClassifier(strategy=strategy)
         self.train_data()
         self.print_metrics()

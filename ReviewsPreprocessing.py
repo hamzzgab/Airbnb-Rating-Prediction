@@ -1,6 +1,7 @@
 import wget, os, re
 import pandas as pd
 from tqdm import tqdm
+from os.path import exists
 
 # LANGUAGE PROCESSOR
 import fasttext
@@ -69,17 +70,19 @@ class ReviewsPreprocessing:
         self.reviews = self.reviews[self.reviews.comments.str.len() > _len]
 
     def get_comment_lang(self):
-        self.reviews['lang'] = range(0, len(self.reviews))
-        for index, row in tqdm(self.reviews.iterrows(), desc="Determining Language: ", total=self.reviews.shape[0]):
-            if type(row['comments']) == type('s'):
-                predictions = model.predict(row['comments'])
-                l = predictions[0][0].split('__label__')[1]
-                # print(l)
-                if l != 'ceb' and l != 'nds' and l != 'war' and l != 'wuu':
-                    self.reviews['lang'][index] = l
-                # lang_name = languages.get(alpha_2=l).name
-                # print(f"{lang_name}")
-
+        if not exists('reviews_lang.csv'):
+            self.reviews['lang'] = range(0, len(self.reviews))
+            for index, row in tqdm(self.reviews.iterrows(), desc="Determining Language: ", total=self.reviews.shape[0]):
+                if type(row['comments']) == type('s'):
+                    predictions = model.predict(row['comments'])
+                    l = predictions[0][0].split('__label__')[1]
+                    if l != 'ceb' and l != 'nds' and l != 'war' and l != 'wuu':
+                        self.reviews['lang'][index] = l
+        
+            self.reviews.to_csv('reviews_lang.csv')
+        else:
+            self.reviews = pd.read_csv('reviews_lang.csv')
+            
     def keep_comment_lang(self, lang='en'):
         self.reviews = self.reviews[self.reviews.lang == lang]
 
@@ -101,20 +104,21 @@ class ReviewsPreprocessing:
         self.stop_words_processed = True
 
     def calculate_comment_polarity(self):
-        self.reviews['compound'] = range(0, len(self.reviews))
-        self.reviews['pos'] = range(0, len(self.reviews))
-        self.reviews['neu'] = range(0, len(self.reviews))
-        self.reviews['neg'] = range(0, len(self.reviews))
-
-        for index, row in tqdm(self.reviews.iterrows(), desc="Calculating Sentiment: ", total=self.reviews.shape[0]):
-            ss = sid.polarity_scores(row['comments'])
-
-            self.reviews['compound'][index] = ss['compound']
-            self.reviews['pos'][index] = ss['pos']
-            self.reviews['neu'][index] = ss['neu']
-            self.reviews['neg'][index] = ss['neg']
-
-        self.reviews.to_csv('reviews_polarity.csv')
+        if not exists('reviews_polarity.csv'):
+            self.reviews['compound'] = range(0, len(self.reviews))
+            self.reviews['pos'] = range(0, len(self.reviews))
+            self.reviews['neu'] = range(0, len(self.reviews))
+            self.reviews['neg'] = range(0, len(self.reviews))
+    
+            for index, row in tqdm(self.reviews.iterrows(), desc="Calculating Sentiment: ", total=self.reviews.shape[0]):
+                ss = sid.polarity_scores(row['comments'])
+    
+                self.reviews['compound'][index] = ss['compound']
+                self.reviews['pos'][index] = ss['pos']
+                self.reviews['neu'][index] = ss['neu']
+                self.reviews['neg'][index] = ss['neg']
+    
+            self.reviews.to_csv('reviews_polarity.csv')
 
     def vectorize_words(self):
         self.reviews = pd.read_csv('reviews_polarity.csv')
@@ -135,10 +139,13 @@ class ReviewsPreprocessing:
         self.reviews_tfidf = pd.read_csv(f'vectors_tfidf_{self.max_features}.csv')
         self.reviews_tfidf.columns = [f"tfidf_{x}" for x in self.feature_names]
         self.reviews_tfidf['listing_id'] = self.reviews['listing_id']
+        
 
     def listings_mean_data(self):
         for key in self.feature_names:
             self.tfidf_df[f'tfidf_{key}'] = self.reviews_tfidf.groupby(by="listing_id")[f'tfidf_{key}'].mean()
+        
+        self.tfidf_df.to_csv(f'vectors_tfidf_{self.max_features}.csv', index=False)
 
         for key in ['compound', 'pos', 'neg', 'neu']:
             self.polarity_df[key] = self.reviews.groupby(by="listing_id")[key].mean()
