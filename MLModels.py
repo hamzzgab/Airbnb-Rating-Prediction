@@ -87,8 +87,8 @@ class TrainingData:
         
         self.model_name = str(self.model).split('(')[0]
         
-        visualizer.show()
-        # visualizer.show(outpath=f"{self.model_name}/ROC/ROCAUC-{self.predicting}.png")
+        # visualizer.show()
+        visualizer.show(outpath=f"{self.model_name}/ROCAUC/{self.predicting}.png")
 
     def feature_importance(self):
         feature_importance = abs(self.model.coef_[0])
@@ -99,17 +99,21 @@ class TrainingData:
                                     columns=['feature_imp', 'features'])
         
         top_features = top_features.sort_values(by='feature_imp', 
-                                                ascending=False).head(15)
+                                                ascending=False)
+        
+        top_features.to_csv(f"{self.model_name}/FeatureImportance/{self.predicting}.csv", index=False)
+        
+        top_features = top_features.head(15)
         
         fig = plt.figure()
         plt.barh(top_features.features, top_features.feature_imp)
-        plt.xlabel('Importance')
-        plt.ylabel('Features')
-        # plt.xticks(fontsize=15)
-        plt.yticks(fontsize=15)
+        plt.xlabel('Importance', fontsize=18)
+        plt.ylabel('Features', fontsize=18)
+        plt.xticks(fontsize=18)
+        plt.yticks(fontsize=18)
         plt.tight_layout()
-        plt.savefig(f"{self.model_name}/FeatureImportance/{self.predicting}.png", 
-                    dpi=120)
+        # plt.savefig(f"{self.model_name}/FeatureImportance/{self.predicting}.png", 
+        #             dpi=120)
         plt.show()
 
 
