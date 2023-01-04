@@ -14,19 +14,8 @@ IMP_FEATURES = [
     'accommodates','minimum_nights','maximum_nights','instant_bookable','price',
     'host_response_time','host_response_rate','host_acceptance_rate',
     'host_listings_count','amenities',
-    # 'latitude','longitude',
-
-    # 'host_location', 
     'bedrooms','beds', 
-    # 'host_about', 'host_neighborhood', 'neighborhood_overview',
-
-    # 'property_type',
     'room_type',
-    # 'bathrooms_text', 'description',
-    # 'host_total_listings_count',
-    # 'has_availability', # Most of them are having availability data imbalance
-
-    # 'neighbourhood',
     'neighbourhood_cleansed',
 ]
 
@@ -62,12 +51,6 @@ def z_score(x):
 
 def minmax(x):
   return (x - x.min()) / (x.max() - x.min())
-
-
-"""
-for f in listings.keys():
-    new_listings[f] = z_score(listings[f])
-"""
 # -------------------------
 # SCALING LISTINGS DATA END
 
@@ -147,13 +130,20 @@ class ListingsPreprocessing:
                       columns=mlb.classes_))
   
   def bin_values(self):
-    self.listings.review_scores_rating = pd.qcut(self.listings.review_scores_rating, 3, duplicates='drop', labels=[0,1,2])
-    self.listings.review_scores_cleanliness = pd.qcut(self.listings.review_scores_cleanliness, 3, duplicates='drop', labels=[0,1,2])
-    self.listings.review_scores_checkin = pd.qcut(self.listings.review_scores_checkin, 2, duplicates='drop', labels=[0, 1])
-    self.listings.review_scores_communication = pd.qcut(self.listings.review_scores_communication, 2, duplicates='drop', labels=[0,1])
-    self.listings.review_scores_location = pd.qcut(self.listings.review_scores_location, 3, duplicates='drop', labels=[0,1,2])
-    self.listings.review_scores_value = pd.qcut(self.listings.review_scores_value, 3, duplicates='drop', labels=[0,1,2])
-    self.listings.review_scores_accuracy = pd.qcut(self.listings.review_scores_accuracy, 3, duplicates='drop', labels=[0,1,2])
+    keys = ['review_scores_rating', 'review_scores_cleanliness', 
+            'review_scores_checkin', 'review_scores_communication', 
+            'review_scores_location', 'review_scores_value',
+            'review_scores_accuracy']
+    
+    for key in keys:
+        cuts = 3
+        labels = [0, 1, 2]
+        
+        if key in ['review_scores_checkin', 'review_scores_communication']:
+            cuts = 2
+            labels = [0, 1]
+            
+    self.listings.review_scores_rating = pd.qcut(self.listings.review_scores_rating, cuts, duplicates='drop', labels=labels)
 
   def scale_values(self, columns=None, func=z_score):
        for f in columns:
