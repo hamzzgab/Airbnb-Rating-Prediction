@@ -82,11 +82,8 @@ dummy_strats = ['most_frequent', 'stratified', 'uniform']
 
 # PREDICTING 7 REVIEW SCORES
 for target in [0, 1, 2, 3, 4, 5, 6]:
-    from MLModels import LogisticRegressionModel, KNeighborsModel, DummyClassifierModel
-    target = 0
     Logi = LogisticRegressionModel(path=f"{name}.csv", target=target, C=params[target]['C'])
-    
-KNN = KNeighborsModel(path=f"{name}.csv", target=target, n_neighbors=params[target]['n_neighbors'])
+    KNN = KNeighborsModel(path=f"{name}.csv", target=target, n_neighbors=params[target]['n_neighbors'])
     Dummy = DummyClassifierModel(path=f"{name}.csv", target=target, strategy=dummy_strats[2])
 display_models_details()
 
