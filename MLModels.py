@@ -88,7 +88,6 @@ class TrainingData:
         self.model_name = str(self.model).split('(')[0]
 
         visualizer.show(outpath=f"{self.model_name}/ROCAUC/{self.predicting}.png")
-        # visualizer.show()
         return visualizer
 
     def feature_importance(self):
