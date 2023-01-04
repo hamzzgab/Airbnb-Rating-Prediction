@@ -68,7 +68,7 @@ class TrainingData:
 
         ypred = self.model.predict(self.Xtest)
         model_mean_error = mean_squared_error(self.ytest, ypred)
-
+        
         models_details.append([f"{self.model} - {self.predicting}", model_score, model_mean_error])
 
         print("-" * 10 + "CONFUSION-MATRIX" + "-" * 10)
@@ -84,38 +84,53 @@ class TrainingData:
                             macro=False, micro=False)
         visualizer.fit(self.Xtrain, self.ytrain)
         visualizer.score(self.Xtest, self.ytest)
-        
+
         self.model_name = str(self.model).split('(')[0]
-        
-        # visualizer.show()
+
         visualizer.show(outpath=f"{self.model_name}/ROCAUC/{self.predicting}.png")
+        # visualizer.show()
+        return visualizer
 
     def feature_importance(self):
         feature_importance = abs(self.model.coef_[0])
         feature_importance = 100.0 * (feature_importance / feature_importance.max())
         
+
         top_features = pd.DataFrame({'feature_imp': feature_importance,
-                                     'features': self.X.columns}, 
+                                     'features': self.X.columns},
                                     columns=['feature_imp', 'features'])
         
-        top_features = top_features.sort_values(by='feature_imp', 
+
+        top_features = top_features.sort_values(by='feature_imp',
                                                 ascending=False)
-        
+
         top_features.to_csv(f"{self.model_name}/FeatureImportance/{self.predicting}.csv", index=False)
-        
         top_features = top_features.head(15)
         
-        fig = plt.figure()
-        plt.barh(top_features.features, top_features.feature_imp)
-        plt.xlabel('Importance', fontsize=18)
-        plt.ylabel('Features', fontsize=18)
-        plt.xticks(fontsize=18)
-        plt.yticks(fontsize=18)
-        plt.tight_layout()
+        col = []
+        for val in top_features.feature_imp:
+            if val < 10:
+                col.append('red')
+            elif 10 < val < 40:
+                col.append('orange')
+            elif 40 < val < 80:
+                col.append('blue')
+            else:
+                col.append('green')
+        
+
+        # fig = plt.figure()
+        # plt.barh(top_features.features, top_features.feature_imp, color=col)
+        # plt.xlabel('Importance', fontsize=18)
+        # plt.ylabel('Features', fontsize=18)
+        # plt.xticks(fontsize=18)
+        # plt.yticks(fontsize=18)
+        # plt.title(f'{self.predicting.title()} Feature Importance', fontsize=18)
+        # plt.tight_layout()
         # plt.savefig(f"{self.model_name}/FeatureImportance/{self.predicting}.png", 
         #             dpi=120)
-        plt.show()
-
+        # plt.show();
+        # plt.close();
 
 
 def display_models_details():
@@ -135,7 +150,8 @@ class LogisticRegressionModel(TrainingData):
 class KNeighborsModel(TrainingData):
     def __init__(self, path=None, target=None, n_neighbors=5):
         super().__init__(path=path, target=target)
-        self.model = KNeighborsClassifier(n_neighbors=n_neighbors, weights='uniform')
+        self.model = KNeighborsClassifier(n_neighbors=n_neighbors,
+                                          weights='uniform')
         self.train_data()
         self.print_metrics()
         self.plot_ROC_curve()

@@ -78,11 +78,11 @@ class ReviewsPreprocessing:
                     l = predictions[0][0].split('__label__')[1]
                     if l != 'ceb' and l != 'nds' and l != 'war' and l != 'wuu':
                         self.reviews['lang'][index] = l
-        
+
             self.reviews.to_csv('reviews_lang.csv')
         else:
             self.reviews = pd.read_csv('reviews_lang.csv')
-            
+
     def keep_comment_lang(self, lang='en'):
         self.reviews = self.reviews[self.reviews.lang == lang]
 
@@ -109,15 +109,16 @@ class ReviewsPreprocessing:
             self.reviews['pos'] = range(0, len(self.reviews))
             self.reviews['neu'] = range(0, len(self.reviews))
             self.reviews['neg'] = range(0, len(self.reviews))
-    
-            for index, row in tqdm(self.reviews.iterrows(), desc="Calculating Sentiment: ", total=self.reviews.shape[0]):
+
+            for index, row in tqdm(self.reviews.iterrows(), desc="Calculating Sentiment: ",
+                                   total=self.reviews.shape[0]):
                 ss = sid.polarity_scores(row['comments'])
-    
+
                 self.reviews['compound'][index] = ss['compound']
                 self.reviews['pos'][index] = ss['pos']
                 self.reviews['neu'][index] = ss['neu']
                 self.reviews['neg'][index] = ss['neg']
-    
+
             self.reviews.to_csv('reviews_polarity.csv')
 
     def vectorize_words(self):
@@ -139,12 +140,11 @@ class ReviewsPreprocessing:
         self.reviews_tfidf = pd.read_csv(f'vectors_tfidf_{self.max_features}.csv')
         self.reviews_tfidf.columns = [f"tfidf_{x}" for x in self.feature_names]
         self.reviews_tfidf['listing_id'] = self.reviews['listing_id']
-        
 
     def listings_mean_data(self):
         for key in self.feature_names:
             self.tfidf_df[f'tfidf_{key}'] = self.reviews_tfidf.groupby(by="listing_id")[f'tfidf_{key}'].mean()
-        
+
         self.tfidf_df.to_csv(f'vectors_tfidf_{self.max_features}.csv', index=False)
 
         for key in ['compound', 'pos', 'neg', 'neu']:

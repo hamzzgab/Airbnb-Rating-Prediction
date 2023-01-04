@@ -8,8 +8,9 @@ from sklearn.model_selection import cross_val_score
 
 max_features = 25
 name = "final_train_data"
-if max_features != 150:
-    name +=  f"_features-{max_features}"
+if max_features != 25:
+    name += f"_features-{max_features}"
+
 
 def create_data():
     # LISTING DATA PRE-PROCESSING START
@@ -34,9 +35,9 @@ def create_data():
 
     reviews_polarity = pd.read_csv(f"{FILE_PATH}reviews_data.csv")
     listings_preprocessed = pd.read_csv(f"{FILE_PATH}listings_data.csv")
-    merged_inner = pd.merge(left=listings_preprocessed, right=reviews_polarity, 
+    merged_inner = pd.merge(left=listings_preprocessed, right=reviews_polarity,
                             left_on='id', right_on='listing_id')
-    
+
     merged_inner.to_csv(f"{name}.csv")
     # ----------------
     # MERGING DATA END
@@ -46,7 +47,6 @@ create_new_data = False
 
 if create_new_data:
     create_data()
-
 
 # -----TARGET-----|
 # rating---------0|
@@ -61,42 +61,41 @@ if create_new_data:
 # FINAL SELECTIONS
 params = {
     # target
-    0:      {'C': 5, 
-             'n_neighbors': 7},  # rating
-    1:      {'C': 1, 
-             'n_neighbors': 3},  # accuracy
-    2:      {'C': 2, 
-             'n_neighbors': 3},  # cleanliness
-    3:      {'C': 10, 
-             'n_neighbors': 5},  # checkin
-    4:      {'C': 5, 
-             'n_neighbors': 7},  # communication
-    5:      {'C': 2, 
-             'n_neighbors': 7},  # location
-    6:      {'C': 5, 
-             'n_neighbors': 7},  # value
+    0: {'C': 5,
+        'n_neighbors': 7},  # rating
+    1: {'C': 1,
+        'n_neighbors': 3},  # accuracy
+    2: {'C': 2,
+        'n_neighbors': 3},  # cleanliness
+    3: {'C': 10,
+        'n_neighbors': 5},  # checkin
+    4: {'C': 5,
+        'n_neighbors': 7},  # communication
+    5: {'C': 2,
+        'n_neighbors': 7},  # location
+    6: {'C': 5,
+        'n_neighbors': 7},  # value
 }
 
 # stratified is a better approach for this problem statement
 dummy_strats = ['most_frequent', 'stratified', 'uniform']
 
+# PREDICTING 7 REVIEW SCORES
 for target in [0, 1, 2, 3, 4, 5, 6]:
     Logi = LogisticRegressionModel(path=f"{name}.csv", target=target, C=params[target]['C'])
     KNN = KNeighborsModel(path=f"{name}.csv", target=target, n_neighbors=params[target]['n_neighbors'])
-    Dummy = DummyClassifierModel(path=f"{name}.csv", target=target, strategy=dummy_strats[0])
+    Dummy = DummyClassifierModel(path=f"{name}.csv", target=target, strategy=dummy_strats[2])
 display_models_details()
 
 
 import pandas as pd
-rating          = pd.read_csv("LogisticRegression/FeatureImportance/rating.csv")
-accuracy        = pd.read_csv("LogisticRegression/FeatureImportance/accuracy.csv")
-cleanliness     = pd.read_csv("LogisticRegression/FeatureImportance/cleanliness.csv")
-checkin         = pd.read_csv("LogisticRegression/FeatureImportance/checkin.csv")
-communication   = pd.read_csv("LogisticRegression/FeatureImportance/communication.csv")
-location        = pd.read_csv("LogisticRegression/FeatureImportance/location.csv")
-value           = pd.read_csv("LogisticRegression/FeatureImportance/value.csv")
-
-
+rating = pd.read_csv("LogisticRegression/FeatureImportance/rating.csv")
+accuracy = pd.read_csv("LogisticRegression/FeatureImportance/accuracy.csv")
+cleanliness = pd.read_csv("LogisticRegression/FeatureImportance/cleanliness.csv")
+checkin = pd.read_csv("LogisticRegression/FeatureImportance/checkin.csv")
+communication = pd.read_csv("LogisticRegression/FeatureImportance/communication.csv")
+location = pd.read_csv("LogisticRegression/FeatureImportance/location.csv")
+value = pd.read_csv("LogisticRegression/FeatureImportance/value.csv")
 
 # CROSS VALIDATION
 """
