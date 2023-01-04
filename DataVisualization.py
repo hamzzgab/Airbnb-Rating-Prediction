@@ -100,12 +100,10 @@ for key in keys:
 
 print(tabulate(tabular_format, headers=['Name', 'Min', 'Max', 'Mean', 'Median']))
 
-"""
+
 import matplotlib.pyplot as plt
 import pandas as pd
-listings = pd.read_csv("merged_data_tfidf_100.csv")
-
-
+listings = pd.read_csv("final_train_data.csv")
 y = listings[[
 'review_scores_rating', 
 'review_scores_accuracy', 
@@ -115,8 +113,6 @@ y = listings[[
 'review_scores_location', 
 'review_scores_value' 
 ]]
-
-
 index = [
 'rating', 
 'accuracy', 
@@ -126,36 +122,130 @@ index = [
 'location', 
 'value' 
 ]
-
 # plt.figure()
 plt.rcParams.update({'font.size': 12}) # must set in top
-
 # fig = plt.figure(figsize=(20, 10))
 df = pd.DataFrame({'0': [1052, 1058, 1042, 1593, 1620, 1080, 1094], 
                    '1': [1125, 1108, 1128, 1557, 1530, 1071, 1030], 
                    '2': [973, 984, 980, None, None, 999, 1026]}, index=index)
 ax = df.plot.bar(rot=90, title='Review Score Values after binning')
 ax.set_ylabel("value counts")
-plt.savefig('bruh.jpg')
 
 
+import pandas as pd
 from ListingsPreprocessing import ListingsPreprocessing
+
+listings_data = ListingsPreprocessing(auto_process=False, dropNaN=True)
+
 ENCODE_COLUMNS = [
     'host_is_superhost', 
     'host_identity_verified', 'instant_bookable',
 ]
-listings_data = ListingsPreprocessing(auto_process=False, dropNaN=True)
+
+
 listings_data.label_encode(columns=ENCODE_COLUMNS)
 listings_data.count_vars('amenities', drop_column=True)
-# self.count_vars('host_verifications', drop_column=False)
 
 listings_data.txt_to_numeric('$', ',', column='price')
 listings_data.txt_to_numeric('%', column='host_response_rate')
 listings_data.txt_to_numeric('%', column='host_acceptance_rate')
 
-listings = listings_data.listings
+training_data = pd.read_csv('final_train_data.csv')
 
-cat, bins = pd.qcut(listings.review_scores_accuracy, 3, duplicates='drop', retbins=True)
+new_store = pd.DataFrame([])
+new_store['accommodates_not_normalized'] = listings_data.listings['accommodates']
+new_store['accommodates'] = training_data['accommodates']
 
-self.listings.review_scores_accuracy = pd.qcut(self.listings.review_scores_accuracy, 3, duplicates='drop', labels=[0,1,2])
-"""
+new_store['price_not_normalized'] = listings_data.listings['price']
+new_store['price'] = training_data['price']
+
+new_store['price_not_normalized'] = listings_data.listings['price']
+new_store['price'] = training_data['price']
+
+new_store['host_response_rate_not_normalized'] = listings_data.listings['host_response_rate']
+new_store['host_response_rate'] = training_data['host_response_rate']
+
+
+new_store['host_acceptance_rate_not_normalized'] = listings_data.listings['host_acceptance_rate']
+new_store['host_acceptance_rate'] = training_data['host_acceptance_rate']
+
+new_store['review_scores_rating'] = listings_data.listings['review_scores_rating']
+
+import matplotlib.pyplot as plt
+
+col = ['host_acceptance_rate', 'price', 'host_response_rate']
+i = 1
+
+fig = plt.figure()
+plt.scatter(new_store[col[i]], new_store.review_scores_rating)
+name = " ".join(col[i].split('_')).title()
+plt.xlabel(name)
+plt.ylabel('Review Scores Rating')
+plt.title('Normalised Data')
+plt.savefig(f'{col[i]}.png', dpi=300)
+plt.close(fig)
+
+fig = plt.figure()
+plt.scatter(new_store[f"{col[i]}_not_normalized"], new_store.review_scores_rating)
+plt.xlabel(name)
+plt.ylabel('Review Scores Rating')
+plt.title('Not Normalised Data')
+plt.savefig(f'{col[i]}_not_normalised.png', dpi=300)
+plt.close(fig)
+
+import seaborn as sns
+
+# START 3D PLOT
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+ax.scatter(new_store.price, new_store.maximum_nights, new_store.review_scores_rating_class, color='blue')
+ax.set_xlabel('price')
+ax.set_ylabel('maximum')
+ax.set_zlabel('rating')
+
+
+
+import pandas as pd
+vectors = pd.read_csv('vectors_tfidf_25.csv')
+new_store['tfidf_would'] = training_data['tfidf_would']
+fig = plt.figure()
+plt.scatter(new_store['tfidf_would'], new_store.review_scores_rating)
+plt.show()
+
+
+listings_data = ListingsPreprocessing(auto_process=True)
+
+
+speed = [0.1, 17.5, 40, 48, 52, 69, 88]
+lifespan = [2, 8, 70, 1.5, 25, 12, 28]
+index = ['snail', 'pig', 'elephant',
+         'rabbit', 'giraffe', 'coyote', 'horse']
+
+import pandas as pd
+acc1 = [0.349206,
+       0.346032,
+       0.369841,
+       0.515873,
+       0.51746,
+       0.322222,
+       0.333333,]
+
+acc2 = [0.347619,
+        0.301587,
+        0.350794,
+        0.487302,
+        0.468254,
+        0.322222,
+        0.328571]
+
+term = ['Rating', 'Accuracy', 'Cleanliness', 'Checkin', 
+        'Communication', 'Location', 'Value']
+
+df = pd.DataFrame({'most_frequent': acc1, 
+                   'strategy': acc2}, index=term)
+ax = df.plot.bar(rot=15, fontsize=13)
+ax.legend(fontsize=16)
+ax.set_ylabel('Accuracy', fontsize=16)
+plt.title("Dummy Classifier Comparison")
+plt.grid(False)
