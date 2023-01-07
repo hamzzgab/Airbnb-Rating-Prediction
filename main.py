@@ -88,15 +88,6 @@ for target in [0, 1, 2, 3, 4, 5, 6]:
 display_models_details()
 
 
-import pandas as pd
-rating = pd.read_csv("LogisticRegression/FeatureImportance/rating.csv")
-accuracy = pd.read_csv("LogisticRegression/FeatureImportance/accuracy.csv")
-cleanliness = pd.read_csv("LogisticRegression/FeatureImportance/cleanliness.csv")
-checkin = pd.read_csv("LogisticRegression/FeatureImportance/checkin.csv")
-communication = pd.read_csv("LogisticRegression/FeatureImportance/communication.csv")
-location = pd.read_csv("LogisticRegression/FeatureImportance/location.csv")
-value = pd.read_csv("LogisticRegression/FeatureImportance/value.csv")
-
 # CROSS VALIDATION
 """
 for target in [0, 1, 2, 3, 4, 5, 6]:

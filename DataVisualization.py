@@ -242,10 +242,14 @@ acc2 = [0.347619,
 term = ['Rating', 'Accuracy', 'Cleanliness', 'Checkin', 
         'Communication', 'Location', 'Value']
 
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
 df = pd.DataFrame({'most_frequent': acc1, 
-                   'strategy': acc2}, index=term)
-ax = df.plot.bar(rot=15, fontsize=13)
-ax.legend(fontsize=16)
-ax.set_ylabel('Accuracy', fontsize=16)
+                   'uniform': acc2}, index=term)
+ax = df.plot.bar(rot=15, fontsize=15)
+ax.legend(fontsize=15)
+ax.set_ylabel('Accuracy', fontsize=15)
 plt.title("Dummy Classifier Comparison")
+plt.legend(loc='upper left', fontsize=15)
 plt.grid(False)
+plt.show();

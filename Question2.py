@@ -167,3 +167,37 @@ plt.show();
 
 import numpy as np
 arr = np.arange(3.0, 5.5, 0.05)
+
+
+# LAGGED OUTPUT
+import pandas as pd
+data = pd.DataFrame({
+    'Date': ['2020-03-18',
+             '2020-04-18',
+             '2020-05-18',
+             '2020-06-18',
+             '2020-07-18',
+             '2020-08-18',
+             ], 
+    'Covid Cases': [ 100,
+                    200,
+                    400,
+                    800,
+                    1600,
+                    3200
+        ],
+    'lag_1': [ None,
+              100,
+              200,
+              400,
+              800,
+              1600,
+        ],
+    'lag_2': [None,
+              None,
+              100,
+              200,
+              400,
+              800,
+        ],
+    })
