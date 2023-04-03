@@ -1,0 +1,20 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: CS7CS2-Exam-2022-23
+message: Please do not copy this code for your exam
+type: software
+authors:
+  - given-names: Hamza
+    family-names: Gabajiwala
+    email: hamzajg16@gmail.com
+    affiliation: Mr
+repository-code: 'https://github.com/hamzzgab/Airbnb-Rating-Prediction'
+abstract: >-
+  This is the code for the Machine Learning Exam 2022-23 for
+  CS7CS2
+keywords:
+  - CS7CS2
+license: MIT
+date-released: '2023-01-04'
